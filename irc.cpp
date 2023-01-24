@@ -6,7 +6,7 @@
 /*   By: jdavis <jdavis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/23 15:33:12 by jdavis            #+#    #+#             */
-/*   Updated: 2023/01/24 12:27:39 by jdavis           ###   ########.fr       */
+/*   Updated: 2023/01/24 17:24:52 by jdavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,13 @@ int main(int argc, char *argv[])
 	int port_nmb;
 	int bind_rt;
 	struct sockaddr_in addr;
-	//int sockfd_chld;
+	struct sockaddr_in cli_addr;
+	int sockfd_chld;
+	socklen_t clilen;
 	int lst_rt;
+	//char BUFF[buff_size];
+	//int ret;
+	//struct pollfd mypoll;
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (argc != 3 || !argv[0] || sockfd < 0 )
@@ -30,6 +35,7 @@ int main(int argc, char *argv[])
 	bzero((char *) &addr, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = INADDR_ANY;
+	addr.sin_port = htons(port_nmb);
 	port_nmb = atoi(argv[1]);
 	bind_rt = bind(sockfd, (const struct sockaddr *) &addr, sizeof(addr));
 	if (bind_rt < 0)
@@ -38,6 +44,24 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 	lst_rt = listen(sockfd, 5);
-	std::cout << lst_rt << "\n"; //std::strerror(errno) << "\n";	
+	clilen = sizeof(cli_addr);
+	sockfd_chld = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+	// int flags = fcntl(sockfd_chld, F_GETFL, 0);
+	// std::cout << flags << "\n";
+	// int check = fcntl(sockfd_chld, F_SETFL, flags | O_NONBLOCK);	
+	// std::cout << check << "\n";
+	// if (sockfd_chld < 0)
+	// 	std::cout << std::strerror(errno) << "\n";
+	// memset(&mypoll, 0, sizeof(mypoll));
+	// mypoll.fd = sockfd_chld;
+	// mypoll.events = POLL_IN;
+	// while (1)
+	// {
+	// 	if (poll(&mypoll, 1, 100) == 1)
+	// 	{
+	// 		//ret = read(sockfd_chld, BUFF, buff_size);
+	// 		recv(sockfd_chld, buff, buff_size, int flags)
+
+	// }
 	return (0);
 }
