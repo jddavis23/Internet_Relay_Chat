@@ -6,7 +6,7 @@
 /*   By: jdavis <jdavis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/23 15:33:12 by jdavis            #+#    #+#             */
-/*   Updated: 2023/01/24 11:49:38 by jdavis           ###   ########.fr       */
+/*   Updated: 2023/01/24 12:27:39 by jdavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ int main(int argc, char *argv[])
 	int port_nmb;
 	int bind_rt;
 	struct sockaddr_in addr;
+	//int sockfd_chld;
+	int lst_rt;
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (argc != 3 || !argv[0] || sockfd < 0 )
@@ -35,6 +37,7 @@ int main(int argc, char *argv[])
 		std::cout << "bind couldnt occur\n" << bind_rt << " " << std::strerror(errno) << "\n";
 		return 0;
 	}
-	std::cout << sockfd << "\n";	
+	lst_rt = listen(sockfd, 5);
+	std::cout << lst_rt << "\n"; //std::strerror(errno) << "\n";	
 	return (0);
 }
