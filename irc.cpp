@@ -6,7 +6,7 @@
 /*   By: jdavis <jdavis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/23 15:33:12 by jdavis            #+#    #+#             */
-/*   Updated: 2023/01/25 12:06:45 by jdavis           ###   ########.fr       */
+/*   Updated: 2023/01/25 15:52:23 by jdavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,13 @@ int main(int argc, char *argv[])
 	int sockfd_chld;
 	socklen_t clilen;
 	int lst_rt;
+	int nfds;
+	int current_size;
+	int i;
+
 	//char BUFF[buff_size];
-	//int ret;
-	//struct pollfd mypoll;
+	int ret;
+	struct pollfd mypoll[MAX_CLIENT];
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (argc != 3 || !argv[0] || sockfd < 0 )
@@ -48,18 +52,38 @@ int main(int argc, char *argv[])
 	}
 	lst_rt = listen(sockfd, 5);
 	clilen = sizeof(cli_addr);
+	mypoll[0].fd = sockfd;
+  	mypoll[0].events = POLLIN;
+	nfds = 1;
 	while (1)
 	{
-		sockfd_chld = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-		std::cout << sockfd_chld << std::endl;
+		current_size = nfds;
+		i = 0;
+		ret = poll(mypoll, nfds, 300);
+		if (ret < 0)
+		{
+			std::cout << "poll() failed\n";
+			return 0;
+		}
+		if ()
+		while (1 && nfds < MAX_CLIENT)
+		{
+			sockfd_chld = accept(sockfd, NULL, NULL);//(struct sockaddr *) &cli_addr, &clilen);
+			if (sockfd_chld < 0)
+			{
+				std::cout << std::strerror(errno);
+				break ;
+			}
+			std::cout << "  New incoming connection\n";
+			mypoll[nfds - 1].fd = sockfd_chld;
+			mypoll[nfds - 1].events = POLLIN;
+			nfds++;
+		}
+		while (1)
 	}
 	std::cout << "here\n";
 	// int flags = fcntl(sockfd_chld, F_GETFL, 0);
 	// std::cout << flags << "\n";
-	// int check = fcntl(sockfd_chld, F_SETFL, flags | O_NONBLOCK);	
-	// std::cout << check << "\n";
-	// if (sockfd_chld < 0)
-	// 	std::cout << std::strerror(errno) << "\n";
 	// memset(&mypoll, 0, sizeof(mypoll));
 	// mypoll.fd = sockfd_chld;
 	// mypoll.events = POLL_IN;
