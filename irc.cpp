@@ -6,7 +6,7 @@
 /*   By: jdavis <jdavis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/23 15:33:12 by jdavis            #+#    #+#             */
-/*   Updated: 2023/01/24 17:24:52 by jdavis           ###   ########.fr       */
+/*   Updated: 2023/01/25 12:06:45 by jdavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,11 +32,14 @@ int main(int argc, char *argv[])
 		std::cout << "usage: ./ircserv <port number> <password>\n";
 		return (-1);
 	}
+	int status = fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFL, 0) | O_NONBLOCK);
+	if (status == -1)
+		std::cout << "fcntl error\n";
 	bzero((char *) &addr, sizeof(addr));
 	addr.sin_family = AF_INET;
+	port_nmb = atoi(argv[1]);
 	addr.sin_addr.s_addr = INADDR_ANY;
 	addr.sin_port = htons(port_nmb);
-	port_nmb = atoi(argv[1]);
 	bind_rt = bind(sockfd, (const struct sockaddr *) &addr, sizeof(addr));
 	if (bind_rt < 0)
 	{
@@ -45,7 +48,12 @@ int main(int argc, char *argv[])
 	}
 	lst_rt = listen(sockfd, 5);
 	clilen = sizeof(cli_addr);
-	sockfd_chld = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+	while (1)
+	{
+		sockfd_chld = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+		std::cout << sockfd_chld << std::endl;
+	}
+	std::cout << "here\n";
 	// int flags = fcntl(sockfd_chld, F_GETFL, 0);
 	// std::cout << flags << "\n";
 	// int check = fcntl(sockfd_chld, F_SETFL, flags | O_NONBLOCK);	

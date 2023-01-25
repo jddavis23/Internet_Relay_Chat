@@ -6,7 +6,7 @@
 /*   By: jdavis <jdavis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/24 16:56:07 by jdavis            #+#    #+#             */
-/*   Updated: 2023/01/24 17:32:17 by jdavis           ###   ########.fr       */
+/*   Updated: 2023/01/25 11:18:33 by jdavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,5 +46,7 @@ int main (int argc, char *argv[])
 		std::cout << std::strerror(errno) << "\n";
 		return 0;
 	}
+	else
+		std::cout << "connection made\n";
 	return 0;
 }
