@@ -6,7 +6,7 @@
 /*   By: jdavis <jdavis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/24 16:56:07 by jdavis            #+#    #+#             */
-/*   Updated: 2023/01/26 13:06:55 by jdavis           ###   ########.fr       */
+/*   Updated: 2023/01/26 17:10:26 by jdavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,9 @@ int main (int argc, char *argv[])
 	int sockfd, portno;//, n;
 	struct sockaddr_in serv_addr;
 	struct hostent *server;
-	char m_buf[BUFFSIZE];
-	int ret;
+	char buffer[BUFFSIZE];
+	//int ret;
+	int n;
 
 	//char buffer[255];
 	if (argc < 3)
@@ -48,12 +49,18 @@ int main (int argc, char *argv[])
 		std::cout << std::strerror(errno) << "\n";
 		return 0;
 	}
-	else
-		std::cout << "connection made\n";
 	while (1)
 	{
-		ret = recv(sockfd, m_buf, BUFFSIZE,  0);
-		send(1, m_buf, ret, 0);
+		bzero(buffer, 255);
+		fgets(buffer, 255, stdin);
+		std::cout << "check\n";		
+		n = write(sockfd, buffer, strlen(buffer));
+		std::cout << n << "\n";
+		if (n < 0)
+			std::cout << "write error\n";
+		bzero(buffer,  255);
+		n = read(sockfd, buffer, 255);
+		std::cout << buffer << "\n";
 	}
 	return 0;
 }

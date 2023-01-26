@@ -6,7 +6,7 @@
 /*   By: jdavis <jdavis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/23 15:33:12 by jdavis            #+#    #+#             */
-/*   Updated: 2023/01/26 13:03:15 by jdavis           ###   ########.fr       */
+/*   Updated: 2023/01/26 17:09:03 by jdavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@ void checkPassword(char *pwd, int fd)
 	
 	while (1)
 	{
-		ret = send(fd, "Enter password: ", 17, 0);
+		ret = send(fd, "Enter password: ", 17, MSG_DONTWAIT);
+		std::cout << ret << "\n";
 		if (ret < 0)
 		{
 			std::cout << std::strerror(errno);
@@ -31,9 +32,11 @@ void checkPassword(char *pwd, int fd)
 		i = 0;
 		while (ret > 0)
 		{
+			std::cout << "here\n";
 			ret = recv(fd, m_buf, BUFFSIZE,  0);
 			if (ret <= 0)
 			{
+				std::cout << std::strerror(errno) << "\n";
 				if (ret == 0 && i < (int)sizeof(pwd))
 					std::cout << "Wrong password\n";
 				break ;
@@ -69,10 +72,11 @@ int main(int argc, char *argv[])
 	Filesender	file;
 
 	//char BUFF[buff_size];
-	int ret;
+	int ret = 0;
 	struct pollfd mypoll[MAX_CLIENT];
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	std::cout << setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (char *)&ret, sizeof(int));
 	if (argc != 3 || !argv[0] || sockfd < 0 )
 	{
 		std::cout << "usage: ./ircserv <port number> <password>\n";
@@ -99,6 +103,7 @@ int main(int argc, char *argv[])
 	nfds = 1;
 	while (1)
 	{
+		std::cout << "3333\n";
 		current_size = nfds;
 		ret = poll(mypoll, nfds, 300);
 		if (ret < 0)
@@ -109,11 +114,13 @@ int main(int argc, char *argv[])
 		if (ret > 0)
 		{
 			i = 0;
+			std::cout << "22222\n";
 			while (i < current_size)
 			{
 				if (mypoll[i].revents == POLL_IN)
 				{
-					file.sendFile(sockfd);
+					std::cout << i << "    44444\n";
+					file.sendFile(mypoll[i].fd);
 					file.handle_io(mypoll[i].fd);
 				}
 				++i;
@@ -122,20 +129,26 @@ int main(int argc, char *argv[])
 		while (1 && nfds < MAX_CLIENT)
 		{
 			sockfd_chld = accept(sockfd, NULL, NULL);//(struct sockaddr *) &cli_addr, &clilen);
-			if (sockfd_chld < 0 && errno != EAGAIN)
-			{
-				std::cout << std::strerror(errno);
-				exit(0);
-				break ;
-			}
+			std::cout<< std::strerror(errno) << "    111111\n";
 			if (sockfd_chld > 0)
 			{
 				std::cout << "  New incoming connection\n";
-				checkPassword(argv[2], sockfd_chld);
-				mypoll[nfds - 1].fd = sockfd_chld;
-				mypoll[nfds - 1].events = POLLIN;
+				exit (0);
+				//checkPassword(argv[2], sockfd_chld);
+				mypoll[nfds].fd = sockfd_chld;
+				mypoll[nfds].events = POLLIN;
 				nfds++;
 			}
+			if (sockfd_chld < 0)
+			{
+				std::cout<<  "666666\n";
+				if (errno != EWOULDBLOCK)
+				{
+					std::cout << "would error\n";
+				}
+				break;	// std::cout << std::strerror(errno);
+			}
+		
 		}
 	}
 	std::cout << "here\n";

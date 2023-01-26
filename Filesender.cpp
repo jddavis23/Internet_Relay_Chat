@@ -6,7 +6,7 @@
 /*   By: jdavis <jdavis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/25 12:09:02 by jdavis            #+#    #+#             */
-/*   Updated: 2023/01/26 12:44:38 by jdavis           ###   ########.fr       */
+/*   Updated: 2023/01/26 17:00:25 by jdavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,36 +40,31 @@ int Filesender::handle_io(int m_fd)
 	int nread;
 
 	if (m_state == IDLE)
-		return 2;     /* nothing to do */
-	/* If buffer empty, fill it */
+		return 2;
 	while (1)
 	{
-		/* Get one chunk of the file from disk */
 		m_buf_len = recv(m_fd, m_buf, BUFFSIZE,  0);
+		std::cout << m_fd << "\n";
 		if (m_buf_len < 0)
 		{
-			/* All done; close the file and the socket. */
-			//close(m_socket);
 			m_state = IDLE;
 			if (errno != EWOULDBLOCK)
             {
-				std::cout << "  recv() failed\n";
-				close(m_fd);
+				std::cout << std::strerror(errno) << "\n";
+				exit(0);
             }
             return -1;
 		}
 		if (m_buf_len == 0)
 		{
 			std::cout << "  Connection closed\n";
-			close(m_fd);
 			return -1;
 		}
 		nread = m_buf_len;
-		m_buf_len = send(1, m_buf, BUFFSIZE, 0);
+		m_buf_len = send(2, m_buf, BUFFSIZE, 0);
 		if (m_buf_len < 0)
 		{
 			std::cout << "  send() failed\n";
-			close(m_fd);
 			return -1;
 		}
 		if (m_buf_len == 0)
