@@ -6,11 +6,12 @@
 /*   By: jdavis <jdavis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/23 15:33:12 by jdavis            #+#    #+#             */
-/*   Updated: 2023/01/25 15:52:23 by jdavis           ###   ########.fr       */
+/*   Updated: 2023/01/26 12:27:41 by jdavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "irc.hpp"
+#include "Filesender.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -25,6 +26,7 @@ int main(int argc, char *argv[])
 	int nfds;
 	int current_size;
 	int i;
+	Filesender	file;
 
 	//char BUFF[buff_size];
 	int ret;
@@ -58,28 +60,42 @@ int main(int argc, char *argv[])
 	while (1)
 	{
 		current_size = nfds;
-		i = 0;
 		ret = poll(mypoll, nfds, 300);
 		if (ret < 0)
 		{
 			std::cout << "poll() failed\n";
 			return 0;
 		}
-		if ()
+		if (ret > 0)
+		{
+			i = 0;
+			while (i < current_size)
+			{
+				if (mypoll[i].revents == POLL_IN)
+				{
+					file.sendFile(sockfd);
+					file.handle_io(mypoll[i].fd);
+				}
+				++i;
+			}
+		}
 		while (1 && nfds < MAX_CLIENT)
 		{
 			sockfd_chld = accept(sockfd, NULL, NULL);//(struct sockaddr *) &cli_addr, &clilen);
-			if (sockfd_chld < 0)
+			if (sockfd_chld < 0 && errno != EAGAIN)
 			{
 				std::cout << std::strerror(errno);
+				exit(0);
 				break ;
 			}
-			std::cout << "  New incoming connection\n";
-			mypoll[nfds - 1].fd = sockfd_chld;
-			mypoll[nfds - 1].events = POLLIN;
-			nfds++;
+			if (sockfd_chld > 0)
+			{
+				std::cout << "  New incoming connection\n";
+				mypoll[nfds - 1].fd = sockfd_chld;
+				mypoll[nfds - 1].events = POLLIN;
+				nfds++;
+			}
 		}
-		while (1)
 	}
 	std::cout << "here\n";
 	// int flags = fcntl(sockfd_chld, F_GETFL, 0);

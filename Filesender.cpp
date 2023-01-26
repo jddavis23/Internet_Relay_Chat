@@ -6,7 +6,7 @@
 /*   By: jdavis <jdavis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/25 12:09:02 by jdavis            #+#    #+#             */
-/*   Updated: 2023/01/25 12:26:56 by jdavis           ###   ########.fr       */
+/*   Updated: 2023/01/26 12:18:06 by jdavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,31 +36,44 @@ void Filesender::sendFile(int socket)
 */
 int Filesender::handle_io(int m_fd)
 {
-	int nwrite;
+	///int nwrite;
 	int nread;
 
 	if (m_state == IDLE)
 		return 2;     /* nothing to do */
 	/* If buffer empty, fill it */
-	if (m_buf_used == m_buf_len)
+	while (1)
 	{
 		/* Get one chunk of the file from disk */
-		m_buf_len = read(m_fd, m_buf, BUFFSIZE);
-		if (m_buf_len == 0) {
+		m_buf_len = recv(m_fd, m_buf, BUFFSIZE,  MSG_WAITALL);
+		if (m_buf_len < 0)
+		{
 			/* All done; close the file and the socket. */
-			close(m_fd);
-			close(m_socket);
+			//close(m_socket);
 			m_state = IDLE;
-			return 1;
+			if (errno != EWOULDBLOCK)
+            {
+				std::cout << "  recv() failed\n";
+				close(m_fd);
+            }
+            return -1;
 		}
-		m_buf_used = 0;
+		if (m_buf_len == 0)
+		{
+			std::cout << "  Connection closed\n";
+			close(m_fd);
+			return -1;
+		}
+		nread = m_buf_len;
+		m_buf_len = send(1, m_buf, BUFFSIZE, 0);
+		if (m_buf_len < 0)
+		{
+			std::cout << "  send() failed\n";
+			close(m_fd);
+			return -1;
+		}
+		if (m_buf_len == 0)
+			return 0;
 	}
-
-	/* Send one chunk of the file */
-	assert(m_buf_len > m_buf_used);
-	nwrite = write(m_socket, m_buf + m_buf_used, m_buf_len - m_buf_used);
-	if (nwrite < 0) 
-		fatal_error("write failed");
-	m_buf_used += nwrite;
 	return 0;
 }
