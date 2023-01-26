@@ -6,7 +6,7 @@
 /*   By: jdavis <jdavis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/25 12:09:02 by jdavis            #+#    #+#             */
-/*   Updated: 2023/01/26 12:18:06 by jdavis           ###   ########.fr       */
+/*   Updated: 2023/01/26 12:44:38 by jdavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ int Filesender::handle_io(int m_fd)
 	while (1)
 	{
 		/* Get one chunk of the file from disk */
-		m_buf_len = recv(m_fd, m_buf, BUFFSIZE,  MSG_WAITALL);
+		m_buf_len = recv(m_fd, m_buf, BUFFSIZE,  0);
 		if (m_buf_len < 0)
 		{
 			/* All done; close the file and the socket. */

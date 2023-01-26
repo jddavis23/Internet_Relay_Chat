@@ -6,12 +6,52 @@
 /*   By: jdavis <jdavis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/23 15:33:12 by jdavis            #+#    #+#             */
-/*   Updated: 2023/01/26 12:27:41 by jdavis           ###   ########.fr       */
+/*   Updated: 2023/01/26 13:03:15 by jdavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "irc.hpp"
 #include "Filesender.hpp"
+
+void checkPassword(char *pwd, int fd)
+{
+	int ret;
+	char m_buf[BUFFSIZE];
+	int i;
+	
+	while (1)
+	{
+		ret = send(fd, "Enter password: ", 17, 0);
+		if (ret < 0)
+		{
+			std::cout << std::strerror(errno);
+			close(fd);
+			return;
+		}
+		i = 0;
+		while (ret > 0)
+		{
+			ret = recv(fd, m_buf, BUFFSIZE,  0);
+			if (ret <= 0)
+			{
+				if (ret == 0 && i < (int)sizeof(pwd))
+					std::cout << "Wrong password\n";
+				break ;
+			}
+			while (i < ret)
+			{
+				if (pwd[i] != m_buf[i])
+				{
+					std::cout << "Wrong password\n";
+					break ;
+				}
+				++i;
+			}
+		}
+	}
+
+
+}
 
 int main(int argc, char *argv[])
 {
@@ -91,6 +131,7 @@ int main(int argc, char *argv[])
 			if (sockfd_chld > 0)
 			{
 				std::cout << "  New incoming connection\n";
+				checkPassword(argv[2], sockfd_chld);
 				mypoll[nfds - 1].fd = sockfd_chld;
 				mypoll[nfds - 1].events = POLLIN;
 				nfds++;
